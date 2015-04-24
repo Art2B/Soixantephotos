@@ -29,3 +29,6 @@ node_modules
 
 #Upload folder
 uploads
+
+#Config files
+config.js
