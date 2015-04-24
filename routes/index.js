@@ -81,6 +81,7 @@ router.post('/new', multer({
       res.status(500).send('Something goes wrong: ',err);
       return console.error(err);
     }
+    fs.unlink(globals.directory +'/'+ req.files.image.path);
 
     res.status(201).send('Image saved');
   });
