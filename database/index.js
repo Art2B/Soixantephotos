@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/soixantephotos');
+var config = require('../config');
+mongoose.connect('mongodb://'+config.mongodb.address+'/'+config.mongodb.nsp);
 
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
