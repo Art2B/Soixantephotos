@@ -18,7 +18,7 @@ router.get('/random', function(req, res) {
 
   Image.find({}, function (err, docs) {
     if(err){
-      res.status(500).send('Something goes wrong',err);
+      res.status(500).send('Something goes wrong: ',err);
       return console.error(err);
     }
     if(docs.length > 0){
@@ -26,7 +26,7 @@ router.get('/random', function(req, res) {
       res.contentType(doc.img.contentType);
       res.status(200).send(doc.img.data);
     } else {
-      res.status(404).send('Random image can\'t be found');
+      res.status(204).send('No content to render');
     }
 
   });
@@ -62,17 +62,23 @@ router.post('/new', multer({
   });
 
   imgToSave.save(function(err, data){
-    if(err) throw err;
+    if(err){
+      res.status(500).send('Something goes wrong: ',err);
+      return console.error(err);
+    }
 
-    res.send('Image saved');
+    res.status(201).send('Image saved');
   });
 });
 
 // For development purpose. Need to be remove when online
 router.delete('/clear', function(req, res){
   Image.remove({}, function(err){
-    if(err) throw err;
-    res.send('DELETE ALL DATABASE');
+    if(err){
+      res.status(500).send('Something goes wrong: ',err);
+      return console.error(err);
+    }
+    res.status(200).send('DELETE ALL DATABASE');
   })
 });
 
