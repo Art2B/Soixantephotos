@@ -28,7 +28,22 @@ router.get('/random', function(req, res) {
     } else {
       res.status(204).send('No content to render');
     }
+  });
+});
 
+router.get('/:category', function(req, res){
+  Image.find({category: req.params.category}, function(err, docs){
+    if(err){
+      res.status(500).send('Something goes wrong: ',err);
+      return console.error(err);
+    }
+    if(docs.length > 0){
+      var doc = _.sample(docs);
+      res.contentType(doc.img.contentType);
+      res.status(200).send(doc.img.data);
+    } else {
+      res.status(204).send('No content to render');
+    }
   });
 });
 
