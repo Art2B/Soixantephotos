@@ -15,7 +15,6 @@ router.get('/', function(req, res) {
 });
 
 router.get('/random', function(req, res) {
-
   Image.find({}, function (err, docs) {
     if(err){
       res.status(500).send('Something goes wrong: ',err);
@@ -23,6 +22,7 @@ router.get('/random', function(req, res) {
     }
     if(docs.length > 0){
       var doc = _.sample(docs);
+      console.log(doc);
       res.contentType(doc.img.contentType);
       res.status(200).send(doc.img.data);
     } else {
@@ -46,6 +46,18 @@ router.get('/:category', function(req, res){
     }
   });
 });
+router.get('/photo/:id', function(req, res){
+  Image.findOne({_id: req.params.id}, function(err, photo){
+    if(err){
+      res.status(404).send('Photo not found');
+    } else {
+      res.contentType(photo.img.contentType);
+      res.status(200).send(photo.img.data);
+    }
+  });
+});
+
+
 
 router.post('/new', multer({
   dest: './uploads/',
