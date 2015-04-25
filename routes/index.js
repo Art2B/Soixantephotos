@@ -94,7 +94,16 @@ router.delete('/clear', function(req, res){
       res.status(500).send('Something goes wrong: ',err);
       return console.error(err);
     }
-    res.status(200).send('DELETE ALL DATABASE');
+    res.status(200).send('Delete all database');
+  })
+});
+router.delete('/clear/:category', function(req, res){
+  Image.remove({category: req.params.category}, function(err){
+    if(err){
+      res.status(500).send('Something goes wrong: ',err);
+      return console.error(err);
+    }
+    res.status(200).send('Delete all category\'s images');
   })
 });
 
