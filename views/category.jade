@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  h1= category
+  if photos.length > 0
+    each photo in photos
+      div.photo
+        a(href="/photo/"+photo._id)
+          img(src="/photo/"+photo._id, alt="")
+        p= photo.name
+  else 
+    p Pas de photos

@@ -37,12 +37,16 @@ router.get('/:category', function(req, res){
       res.status(500).send('Something goes wrong: ',err);
       return console.error(err);
     }
-    if(docs.length > 0){
-      var doc = _.sample(docs);
-      res.contentType(doc.img.contentType);
-      res.status(200).send(doc.img.data);
+    if(req.get('Accept').indexOf("html") >= 0){
+      res.render('category', {photos: docs, category: req.params.category});
     } else {
-      res.status(204).send('No content to render');
+      if(docs.length > 0){
+        var doc = _.sample(docs);
+        res.contentType(doc.img.contentType);
+        res.status(200).send(doc.img.data);
+      } else {
+        res.status(204).send('No content to render');
+      }
     }
   });
 });
