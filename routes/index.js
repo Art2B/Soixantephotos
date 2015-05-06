@@ -5,6 +5,7 @@ var imagesSchema = require('../database/image');
 var _ = require('lodash');
 var multer  = require('multer');
 var uuid = require('uuid');
+var im = require('imagemagick');
 
 var Image = mongoose.model('Image', imagesSchema);
 var router = express.Router();
@@ -22,7 +23,6 @@ router.get('/random', function(req, res) {
     }
     if(docs.length > 0){
       var doc = _.sample(docs);
-      console.log(doc);
       res.contentType(doc.img.contentType);
       res.status(200).send(doc.img.data);
     } else {
@@ -83,24 +83,34 @@ router.post('/new', multer({
   }
 }),  function(req, res, next){
 
-  var imgToSave = new Image({
-    name: req.files.image.originalname,
-    category: req.body.category,
-    img: {
-      data: fs.readFileSync(globals.directory +'/'+ req.files.image.path),
-      contentType: req.files.image.mimetype
-    }
-  });
-
-  imgToSave.save(function(err, data){
-    if(err){
+  im.identify(globals.directory +'/'+ req.files.image.path, function(err, features){
+    if (err) {
       res.status(500).send('Something goes wrong: ',err);
-      return console.error(err);
     }
-    fs.unlink(globals.directory +'/'+ req.files.image.path);
+    var imgToSave = new Image({
+      name: req.files.image.originalname,
+      category: req.body.category,
+      img: {
+        data: fs.readFileSync(globals.directory +'/'+ req.files.image.path),
+        contentType: req.files.image.mimetype,
+        size: {
+          height: features.height,
+          width: features.width
+        }
+      }
+    });
 
-    res.status(201).send('Image saved');
+    imgToSave.save(function(err, data){
+      if(err){
+        res.status(500).send('Something goes wrong: ',err);
+        return console.error(err);
+      }
+      fs.unlink(globals.directory +'/'+ req.files.image.path);
+
+      res.status(201).send('Image saved');
+    });
   });
+
 });
 
 // For development purpose. Need to be remove when online

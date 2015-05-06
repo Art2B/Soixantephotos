@@ -6,7 +6,11 @@ var imageSchema = new Schema({
   category:   String,
   img: {
     data: Buffer,
-    contentType: String
+    contentType: String,
+    size: {
+      height: Number,
+      width: Number
+    }
   }
 });
 
