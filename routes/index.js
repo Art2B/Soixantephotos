@@ -12,7 +12,12 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  Image.find({}, function(err, docs){
+    if(err){
+      throw err;
+    }
+    res.render('index', { title: 'Soixante photos', photoNumber: docs.length});
+  });
 });
 
 router.get('/random', function(req, res) {
@@ -87,28 +92,47 @@ router.post('/new', multer({
     if (err) {
       res.status(500).send('Something goes wrong: ',err);
     }
-    var imgToSave = new Image({
-      name: req.files.image.originalname,
-      category: req.body.category,
-      img: {
-        data: fs.readFileSync(globals.directory +'/'+ req.files.image.path),
-        contentType: req.files.image.mimetype,
-        size: {
-          height: features.height,
-          width: features.width
+
+    if(features.height > 1920 || features.widht > 1920){
+      var size = {};
+      if(features.height > features.width){
+        size.height = 1920;
+        size.width = 1920/(features.height/features.width);
+      } else {
+        size.height = 1920/(features.height/features.width);
+        size.widht = 1920;
+      }
+      im.resize({
+        srcPath: globals.directory +'/'+ req.files.image.path,
+        dstPath: globals.directory +'/'+ req.files.image.path,
+        width: size.width,
+        height: size.height,
+        quality: 1,
+      }, function(err){
+        if(err){
+          throw err;
         }
-      }
-    });
+        createImage(req, features).save(function(err, data){
+          if(err){
+            res.status(500).send('Something goes wrong: ',err);
+            return console.error(err);
+          }
+          fs.unlink(globals.directory +'/'+ req.files.image.path);
 
-    imgToSave.save(function(err, data){
-      if(err){
-        res.status(500).send('Something goes wrong: ',err);
-        return console.error(err);
-      }
-      fs.unlink(globals.directory +'/'+ req.files.image.path);
+          res.status(201).send('Image saved');
+        });
+      });
+    } else {
+      createImage(req, features).save(function(err, data){
+        if(err){
+          res.status(500).send('Something goes wrong: ',err);
+          return console.error(err);
+        }
+        fs.unlink(globals.directory +'/'+ req.files.image.path);
 
-      res.status(201).send('Image saved');
-    });
+        res.status(201).send('Image saved');
+      });
+    }
   });
 
 });
@@ -132,5 +156,22 @@ router.delete('/clear/:category', function(req, res){
     res.status(200).send('Delete all category\'s images');
   })
 });
+
+function createImage(req, features){
+  return new Image({
+    name: req.files.image.originalname,
+    category: req.body.category,
+    sfw: req.body.sfw,
+    img: {
+      data: fs.readFileSync(globals.directory +'/'+ req.files.image.path),
+      contentType: req.files.image.mimetype,
+      size: {
+        height: features.height,
+        width: features.width
+      }
+    }
+  });
+}
+
 
 module.exports = router;

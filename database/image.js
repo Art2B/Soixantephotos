@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 var imageSchema = new Schema({
   name:  String,
   category:   String,
+  sfw: Boolean,
   img: {
     data: Buffer,
     contentType: String,
