@@ -1,13 +1,11 @@
 var express = require('express');
-var fs = require('fs');
 var mongoose = require('mongoose');
 var imagesSchema = require('../database/image');
 var _ = require('lodash');
-var multer  = require('multer');
-var uuid = require('uuid');
-var im = require('imagemagick');
 
 var Image = mongoose.model('Image', imagesSchema);
+var categorySchema = require('../database/category');
+
 var router = express.Router();
 
 /* GET home page. */
