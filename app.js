@@ -12,6 +12,7 @@ var multer  = require('multer');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
+var photos = require('./routes/photos');
 
 var db = require('./database/index.js');
 
@@ -30,6 +31,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/photos', photos);
 app.use('/', routes);
 app.use('/users', users);
 

@@ -5,8 +5,8 @@ block content
   if photos.length > 0
     each photo in photos
       div.photo
-        a(href="/photo/"+photo._id)
-          img(src="/photo/"+photo._id, alt="")
+        a(href="/photos/"+photo._id)
+          img(src="/photos/"+photo._id, alt="")
         p= photo.name
   else 
     p Pas de photos
