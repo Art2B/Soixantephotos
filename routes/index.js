@@ -21,7 +21,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/random', function(req, res) {
-  Image.find({}, function (err, docs) {
+  Image.find({nsfw: (req.query.sfw === "true")}, function (err, docs) {
     if(err){
       res.status(500).send('Something goes wrong: ',err);
       return console.error(err);
@@ -37,7 +37,7 @@ router.get('/random', function(req, res) {
 });
 
 router.get('/:category', function(req, res){
-  Image.find({category: req.params.category}, function(err, docs){
+  Image.find({category: req.params.category, nsfw: (req.query.sfw === "true")}, function(err, docs){
     if(err){
       res.status(500).send('Something goes wrong: ',err);
       return console.error(err);
