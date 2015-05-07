@@ -1,0 +1,20 @@
+extends ../partials/layout
+
+block content
+  h1 Upload your photo
+  form(action="/photos/new", method="post", enctype='multipart/form-data')
+    label(for="category") Category
+    input(type="text", name="category", id="category" placeholder="category")
+    br
+    label(for="nsfw") NSFW
+    input(type="checkbox", name="nsfw", id="nsfw")
+    br
+    label(for="image") Image
+    input(type="file", name="image", id="image")
+    br
+    input(type="submit" value="Send")
+
+block append scripts
+  script(src="/js/partials/photoupload.js")
+  script.
+    photoUpload.init();
