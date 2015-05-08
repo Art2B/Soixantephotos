@@ -2,19 +2,22 @@ extends ../partials/layout
 
 block content
   h1 Upload your photo
-  form(action="/photos/new", method="post", enctype='multipart/form-data')
+  form()
     label(for="category") Category
     input(type="text", name="category", id="category" placeholder="category")
     br
     label(for="nsfw") NSFW
     input(type="checkbox", name="nsfw", id="nsfw")
-    br
-    label(for="image") Image
-    input(type="file", name="image", id="image")
-    br
-    input(type="submit" value="Send")
+
+  form#dropzone
+    input(type="hidden" name="category" value="" id="catData")
+    input(type="hidden" name="nsfw" value="" id="nsfwData")
+  
+  input(type="button" value="Send" id="upload-image")
+
 
 block append scripts
+  script(src="/js/lib/dropzone.js")
   script(src="/js/partials/photoupload.js")
   script.
     photoUpload.init();

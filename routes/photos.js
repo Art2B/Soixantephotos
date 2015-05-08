@@ -6,6 +6,7 @@ var uuid = require('uuid');
 var im = require('imagemagick');
 var im = require('imagemagick');
 var Promise = require('promise');
+var colors = require('colors');
 
 // Mongoose Schema
 var imagesSchema = require('../database/image');
@@ -54,97 +55,101 @@ router.post('/new', multer({
     return filename.replace(/\W+/g, '-').toLowerCase() + uuid.v4();
   }
 }),  function(req, res, next){
-  console.log(req.body);
-  // new Promise(function(fulfill, reject){
-  //   im.identify(globals.directory +'/'+ req.files.image.path, function(err, features){
-  //     if(err) reject(err);
-  //     else {
-  //       fulfill(features);
-  //     }
-  //   });
-  // })
-  // .then(function(features){
-  //   return new Promise(function(fulfill, reject){
-  //     if(features.height > 1920 || features.widht > 1920){
-  //       console.log('if');
-  //       var size = {};
-  //       if(features.height > features.width){
-  //         size.height = 1920;
-  //         size.width = 1920/(features.height/features.width);
-  //       } else {
-  //         size.height = 1920/(features.height/features.width);
-  //         size.widht = 1920;
-  //       }
-  //       im.resize({
-  //         srcPath: globals.directory +'/'+ req.files.image.path,
-  //         dstPath: globals.directory +'/'+ req.files.image.path,
-  //         width: size.width,
-  //         height: size.height,
-  //         quality: 1,
-  //       }, function(err){
-  //         if(err) reject(err);
-  //         else {
-  //           im.identify(globals.directory +'/'+ req.files.image.path, function(err, features){
-  //             fulfill(features);
-  //           });
-  //         }
-  //       });
-  //     } else {
-  //       fulfill(features);
-  //     }
-  //   });
-  // })
-  // .then(function(features){
-  //   return new Promise(function(fulfill, reject){
-  //     console.log(req.body.category);
-  //     Category.findOne({name: req.body.category}, function(err, doc){
-  //       if(err) reject(err);
-  //       else fulfill({category: doc, features: features});
-  //     });
-  //   });
-  // })
-  // .then(function(result){
-  //   return new Promise(function(fulfill, reject){
-  //     if(!result.category){
-  //       new Category({
-  //         name: req.body.category
-  //       }).save(function(err, data){
-  //         if(err) reject(err);
-  //         else fulfill({category: data, features: result.features});
-  //       });
-  //     } else {
-  //       fulfill({category: result.category, features: result.features});
-  //     }
-  //   });
-  // })
-  // .then(function(result){
-  //   return new Promise(function(fulfill, reject){
-  //     fulfill(new Image({
-  //       name: req.files.image.originalname,
-  //       category: result.category,
-  //       sfw: req.body.sfw,
-  //       img: {
-  //         data: fs.readFileSync(globals.directory +'/'+ req.files.image.path),
-  //         contentType: req.files.image.mimetype,
-  //         size: {
-  //           height: result.features.height,
-  //           width: result.features.width
-  //         }
-  //       }
-  //     }));
-  //   });
-  // })
-  // .then(function(image){
-  //   image.save(function(err, data){
-  //     if(err){
-  //       res.status(500).send('Something goes wrong: ',err);
-  //       return console.error(err);
-  //     }
-  //     fs.unlink(globals.directory +'/'+ req.files.image.path);
-  //     console.log('image saved :)');
-  //     res.status(201).send('Image saved');
-  //   });
-  // });
+  console.log('New image to save'.green);
+  new Promise(function(fulfill, reject){
+    im.identify(globals.directory +'/'+ req.files.file.path, function(err, features){
+      if(err) reject(err);
+      else {
+        fulfill(features);
+      }
+    });
+  })
+  .then(function(features){
+    return new Promise(function(fulfill, reject){
+      if(features.height > 1920 || features.widht > 1920){
+        console.log('Need to resize image'.grey);
+        var size = {};
+        if(features.height > features.width){
+          size.height = 1920;
+          size.width = 1920/(features.height/features.width);
+        } else {
+          size.height = 1920/(features.height/features.width);
+          size.widht = 1920;
+        }
+        im.resize({
+          srcPath: globals.directory +'/'+ req.files.file.path,
+          dstPath: globals.directory +'/'+ req.files.file.path,
+          width: size.width,
+          height: size.height,
+          quality: 1,
+        }, function(err){
+          if(err) reject(err);
+          else {
+            im.identify(globals.directory +'/'+ req.files.file.path, function(err, features){
+              fulfill(features);
+            });
+          }
+        });
+      } else {
+        fulfill(features);
+      }
+    });
+  })
+  .then(function(features){
+    return new Promise(function(fulfill, reject){
+      console.log('Category of image: '+req.body.category+''.grey);
+      Category.findOne({name: req.body.category}, function(err, doc){
+        if(err) reject(err);
+        else fulfill({category: doc, features: features});
+      });
+    });
+  })
+  .then(function(result){
+    return new Promise(function(fulfill, reject){
+      if(!result.category){
+        new Category({
+          name: req.body.category
+        }).save(function(err, data){
+          if(err) reject(err);
+          else {
+            // console.log('Category created :)'.grey);
+            fulfill({category: data, features: result.features});
+          }
+        });
+      } else {
+        // console.log('Category already exist :) '.grey);
+        fulfill(result);
+      }
+    });
+  })
+  .then(function(result){
+    return new Promise(function(fulfill, reject){
+      fulfill(new Image({
+        name: req.files.file.originalname,
+        category: result.category,
+        nsfw: (req.body.nsfw === true),
+        img: {
+          data: fs.readFileSync(globals.directory +'/'+ req.files.file.path),
+          contentType: req.files.file.mimetype,
+          size: {
+            height: result.features.height,
+            width: result.features.width
+          }
+        }
+      }));
+    });
+  })
+  .then(function(image){
+    image.save(function(err, data){
+      if(err){
+        res.status(500).send('Something goes wrong: ',err,''.red);
+        return console.error(err);
+      }
+      fs.unlink(globals.directory +'/'+ req.files.file.path);
+      console.log('image saved :)'.green);
+      res.status(201).send('Image saved');
+    });
+  });
 });
 
 /* DELETE ROUTES */
