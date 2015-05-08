@@ -80,15 +80,19 @@ router.post('/new', multer({
         console.log('Need to resize image'.grey);
         var size = {};
         if(features.height > features.width){
+          // console.log('Height is bigger than width'.grey);
           size.height = 1920;
-          size.width = 1920/(features.height/features.width);
+          size.width = Math.round(1920/(features.height/features.width));
         } else if(features.width > features.height){
-          size.height = 1920/(features.height/features.width);
-          size.widht = 1920;
+          // console.log('Width is bigger than height'.grey);
+          size.height = Math.round(1920/(features.width/features.height));
+          size.width = 1920;
         } else {
+          // console.log('Height and width are the same size'.grey);
           size.height = 1920;
           size.width = 1920;
         }
+        // console.log('Image new size: ',size);
         im.resize({
           srcPath: globals.directory +'/'+ req.files.file.path,
           dstPath: globals.directory +'/'+ req.files.file.path,
@@ -97,11 +101,10 @@ router.post('/new', multer({
           quality: 1,
         }, function(err){
           if(err) reject(err);
-          else {
-            im.identify(globals.directory +'/'+ req.files.file.path, function(err, features){
-              fulfill(features);
-            });
-          }
+          console.log('resize done'.grey);
+          im.identify(globals.directory +'/'+ req.files.file.path, function(err, features){
+            fulfill(features);
+          });
         });
       } else {
         fulfill(features);
@@ -213,13 +216,45 @@ router.delete('/clear', function(req, res){
   });
 });
 router.delete('/clear/:category', function(req, res){
-  Image.remove({category: req.params.category}, function(err){
-    if(err){
-      res.status(500).send('Something goes wrong: ',err);
-      return console.error(err);
-    }
-    res.status(200).send('Delete all category\'s images');
-  })
+  Category
+  .findOne({name: req.params.category})
+  .populate('photos')
+  .exec(function(err, category){
+    var nbPhotos = category.photos.length;
+
+    new Promise(function(fulfill, reject){
+      category.photos.forEach(function(photo, key){
+        Image.remove(photo, function(err){
+          if(err){
+            res.status(500).send('Something goes wrong: ',err);
+            console.error(err);
+          }
+          console.log('Image deleted'.red);
+          if(key == nbPhotos-1){
+            fulfill();
+          }
+        });
+      });
+    })
+    .then(function(){
+      Category.remove({name: req.params.category}, function(err){
+        if(err){
+          res.status(500).send('Something goes wrong: ',err);
+          console.error(err);
+        } else {
+          res.status(200).send('Delete all category\'s images');
+        }
+      });
+    })
+
+  });
+
+  // Image.remove({category: req.params.category}, function(err){
+  //   if(err){
+  //     res.status(500).send('Something goes wrong: ',err);
+  //     return console.error(err);
+  //   }
+  // })
 });
 
 module.exports = router;
