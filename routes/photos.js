@@ -113,7 +113,7 @@ router.post('/new', multer({
   })
   .then(function(features){
     return new Promise(function(fulfill, reject){
-      console.log('Category of image: '+req.body.category+''.grey);
+      // console.log('Category of image: '+req.body.category);
       Category.findOne({name: req.body.category}, function(err, doc){
         if(err) reject(err);
         else fulfill({category: doc, features: features});
@@ -144,7 +144,7 @@ router.post('/new', multer({
         image: new Image({
           name: req.files.file.originalname,
           category: result.category._id,
-          nsfw: (req.body.nsfw === true),
+          nsfw: (req.body.nsfw === 'true'),
           img: {
             data: fs.readFileSync(globals.directory +'/'+ req.files.file.path),
             contentType: req.files.file.mimetype,
@@ -173,24 +173,12 @@ router.post('/new', multer({
   })
   .then(function(result){
     // console.log('Push image to category'.cyan);
-    return new Promise(function(fulfill, reject){
-      result.category.photos.push(result.image);
-      result.category.save(function(err, data){
-        if(err) reject(err);
-        fulfill(result.category);
-      });
+    result.category.photos.push(result.image);
+    result.category.save(function(err, data){
+      if(err) reject(err);
+      res.status(201).send('Image saved');
     });
   });
-  // .then(function(category){
-  //   // console.log('Check category'.cyan);
-  //   Category
-  //   .findOne(category)
-  //   .exec(function(err, photos){
-  //     if(err) console.log(err);
-  //     // console.log('The photos are: ', photos);
-  //     res.status(201).send('Image saved');
-  //   });
-  // });
 });
 
 /* DELETE ROUTES */
