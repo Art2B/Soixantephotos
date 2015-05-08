@@ -124,51 +124,80 @@ router.post('/new', multer({
   })
   .then(function(result){
     return new Promise(function(fulfill, reject){
-      fulfill(new Image({
-        name: req.files.file.originalname,
-        category: result.category,
-        nsfw: (req.body.nsfw === true),
-        img: {
-          data: fs.readFileSync(globals.directory +'/'+ req.files.file.path),
-          contentType: req.files.file.mimetype,
-          size: {
-            height: result.features.height,
-            width: result.features.width
+      fulfill({
+        image: new Image({
+          name: req.files.file.originalname,
+          category: result.category._id,
+          nsfw: (req.body.nsfw === true),
+          img: {
+            data: fs.readFileSync(globals.directory +'/'+ req.files.file.path),
+            contentType: req.files.file.mimetype,
+            size: {
+              height: result.features.height,
+              width: result.features.width
+            }
           }
-        }
-      }));
+        }),
+        category: result.category
+      });
     });
   })
-  .then(function(image){
-    image.save(function(err, data){
-      if(err){
-        res.status(500).send('Something goes wrong: ',err,''.red);
-        return console.error(err);
-      }
-      fs.unlink(globals.directory +'/'+ req.files.file.path);
-      console.log('image saved :)'.green);
-      res.status(201).send('Image saved');
+  .then(function(result){
+    console.log('Result: ', result);
+    return new Promise(function(fulfill, reject){
+      result.image.save(function(err, data){
+        if(err){
+          res.status(500).send('Something goes wrong: ',err,''.red);
+          reject(err);
+        }
+        fs.unlink(globals.directory +'/'+ req.files.file.path);
+        console.log('image saved :)'.green);
+        fulfill(result);
+      });
+    });
+  })
+  .then(function(result){
+    // console.log('Push image to category'.cyan);
+    return new Promise(function(fulfill, reject){
+      result.category.photos.push(result.image);
+      result.category.save(function(err, data){
+        if(err) reject(err);
+        fulfill(result.category);
+      });
     });
   });
+  // .then(function(category){
+  //   // console.log('Check category'.cyan);
+  //   Category
+  //   .findOne(category)
+  //   .exec(function(err, photos){
+  //     if(err) console.log(err);
+  //     // console.log('The photos are: ', photos);
+  //     res.status(201).send('Image saved');
+  //   });
+  // });
 });
 
 /* DELETE ROUTES */
 router.delete('/clear', function(req, res){
-  Image.remove({}, function(err){
-    if(err){
-      res.status(500).send('Something goes wrong: ',err);
-      return console.error(err);
-    }
-    res.status(200).send('Delete all database');
+  new Promise(function(fulfill, reject){
+    Image.remove({}, function(err){
+      if(err){
+        res.status(500).send('Something goes wrong: ',err);
+        reject(err);
+      } else {
+        fulfill();
+      }
+    })
   })
-});
-router.delete('/category/clear', function(req, res){
-  Category.remove({}, function(err){
-    if(err){
-      res.status(500).send('Something goes wrong: ',err);
-      return console.error(err);
-    }
-    res.status(200).send('Delete all database');
+  .then(function(){
+    Category.remove({}, function(err){
+      if(err){
+        res.status(500).send('Something goes wrong: ',err);
+        return console.error(err);
+      }
+      res.status(200).send('Delete all database');
+    });
   });
 });
 router.delete('/clear/:category', function(req, res){

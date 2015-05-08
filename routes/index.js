@@ -1,20 +1,25 @@
 var express = require('express');
 var mongoose = require('mongoose');
-var imagesSchema = require('../database/image');
 var _ = require('lodash');
+var Promise = require('promise');
 
-var Image = mongoose.model('Image', imagesSchema);
+var imagesSchema = require('../database/image');
 var categorySchema = require('../database/category');
+var Image = mongoose.model('Image', imagesSchema);
+var Category = mongoose.model('Category', categorySchema);
 
 var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  Image.find({}, function(err, docs){
+  Image
+  .find({})
+  .populate('category')
+  .exec(function(err, images){
     if(err){
       throw err;
     }
-    res.render('index', { title: 'Soixante photos', photoNumber: docs.length});
+    res.render('index', { title: 'Soixante photos', photos: images});
   });
 });
 
@@ -35,18 +40,30 @@ router.get('/random', function(req, res) {
 });
 
 router.get('/:category', function(req, res){
-  Image.find({category: req.params.category, nsfw: (req.query.sfw === "true")}, function(err, docs){
-    if(err){
-      res.status(500).send('Something goes wrong: ',err);
-      return console.error(err);
-    }
-    if(req.get('Accept').indexOf("html") >= 0){
-      res.render('category', {photos: docs, category: req.params.category});
+  Category
+  .findOne({name: req.params.category}, function(err, category){
+    if(err) console.log(err);
+    if(category){
+      Category.findOne(category)
+      .populate('photos')
+      .exec(function(err, category){
+        if(err) console.log(err);
+        console.log('Voici la categorie: ',category);
+        if(req.get('Accept').indexOf("html") >= 0){
+          res.status(200).render('category', {photos: category.photos, category: req.params.category});
+        } else {
+          if(category.photos.length > 0){
+            var doc = _.sample(category.photos);
+            res.contentType(doc.img.contentType);
+            res.status(200).send(doc.img.data);
+          } else {
+            res.status(204).send('No content to render');
+          }
+        }
+      });
     } else {
-      if(docs.length > 0){
-        var doc = _.sample(docs);
-        res.contentType(doc.img.contentType);
-        res.status(200).send(doc.img.data);
+      if(req.get('Accept').indexOf("html") >= 0){
+        res.status(200).render('category', {photos: [], category: req.params.category});
       } else {
         res.status(204).send('No content to render');
       }

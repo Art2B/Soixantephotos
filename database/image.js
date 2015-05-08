@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 var imageSchema = new Schema({
   name:  String,
-  category:   String,
+  category: { type: String, ref: 'Category' },
   nsfw: Boolean,
   img: {
     data: Buffer,
