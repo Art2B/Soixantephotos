@@ -15,8 +15,8 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Soixante photos'});
 });
 
-router.get('/random', function(req, res) {
-  Image.find({nsfw: (req.query.nsfw === true)}, function (err, docs) {
+router.get('/random', function(req, res) {;
+  Image.find((req.query.nsfw === true) ? {nsfw: true} : {}, function (err, docs) {
     if(err){
       res.status(500).send('Something goes wrong: ',err);
       return console.error(err);
@@ -33,7 +33,7 @@ router.get('/random', function(req, res) {
 
 router.get('/:category', function(req, res){
   Category
-  .findOne({name: req.params.category}, function(err, category){
+  .findOne({name: req.params.category, nsfw: (req.query.nsfw === true) ? true : false}, function(err, category){
     if(err) console.log(err);
     if(category){
       Category.findOne(category)

@@ -23,16 +23,6 @@ router.get('/', function(req, res) {
 router.get('/new', function(req, res){
   res.render('photos/new');
 })
-router.get('/:id', function(req, res){
-  Image.findOne({_id: req.params.id}, function(err, photo){
-    if(err){
-      res.status(404).send('Photo not found');
-    } else {
-      res.contentType(photo.img.contentType);
-      res.status(200).send(photo.img.data);
-    }
-  });
-});
 router.get('/all', function(req, res) {
   Image
   .find({})
@@ -41,7 +31,17 @@ router.get('/all', function(req, res) {
     if(err){
       throw err;
     }
-    res.render('photo/all', {photos: images});
+    res.render('photos/all', {photos: images});
+  });
+});
+router.get('/:id', function(req, res){
+  Image.findOne({_id: req.params.id}, function(err, photo){
+    if(err){
+      res.status(404).send('Photo not found');
+    } else {
+      res.contentType(photo.img.contentType);
+      res.status(200).send(photo.img.data);
+    }
   });
 });
 
@@ -82,9 +82,12 @@ router.post('/new', multer({
         if(features.height > features.width){
           size.height = 1920;
           size.width = 1920/(features.height/features.width);
-        } else {
+        } else if(features.width > features.height){
           size.height = 1920/(features.height/features.width);
           size.widht = 1920;
+        } else {
+          size.height = 1920;
+          size.width = 1920;
         }
         im.resize({
           srcPath: globals.directory +'/'+ req.files.file.path,
@@ -153,7 +156,6 @@ router.post('/new', multer({
     });
   })
   .then(function(result){
-    console.log('Result: ', result);
     return new Promise(function(fulfill, reject){
       result.image.save(function(err, data){
         if(err){
