@@ -4,8 +4,8 @@ var photoUpload = (function(my){
     var myDropzone = new Dropzone("#dropzone", {
       url: "/photos/new",
       maxFilesize: 10,
-      // maxFiles: 1,
       autoProcessQueue: false,
+      uploadMultiple: false,
       acceptedFiles: 'image/*'
     });
 
