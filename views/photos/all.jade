@@ -1,0 +1,13 @@
+extends ../partials/layout
+
+block content
+  h1= Soixante photos
+  p all photos of Soixante photos
+  p There is #{photos.length} photos actually.
+  if photos.length > 0
+    each photo in photos
+      div.photo
+        a(href="/photos/"+photo._id)
+          img(src="/photos/"+photo._id, alt="")
+        p= photo.name
+        p= photo.category.name

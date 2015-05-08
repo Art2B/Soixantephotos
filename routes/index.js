@@ -12,15 +12,7 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  Image
-  .find({})
-  .populate('category')
-  .exec(function(err, images){
-    if(err){
-      throw err;
-    }
-    res.render('index', { title: 'Soixante photos', photos: images});
-  });
+  res.render('index', { title: 'Soixante photos'});
 });
 
 router.get('/random', function(req, res) {

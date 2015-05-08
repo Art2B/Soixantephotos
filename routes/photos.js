@@ -23,7 +23,6 @@ router.get('/', function(req, res) {
 router.get('/new', function(req, res){
   res.render('photos/new');
 })
-
 router.get('/:id', function(req, res){
   Image.findOne({_id: req.params.id}, function(err, photo){
     if(err){
@@ -32,6 +31,17 @@ router.get('/:id', function(req, res){
       res.contentType(photo.img.contentType);
       res.status(200).send(photo.img.data);
     }
+  });
+});
+router.get('/all', function(req, res) {
+  Image
+  .find({})
+  .populate('category')
+  .exec(function(err, images){
+    if(err){
+      throw err;
+    }
+    res.render('photo/all', {photos: images});
   });
 });
 
