@@ -22,7 +22,13 @@ router.get('/', function(req, res) {
 });
 router.get('/new', function(req, res){
   res.render('photos/new');
-})
+});
+router.get('/verify', function(req, res){
+  Image.find({verified: false}, function(err, photos){
+    if(err) console.log(err);
+    res.render('photos/verify', {photos: photos});
+  })
+});
 router.get('/all', function(req, res) {
   Image
   .find({})
@@ -145,6 +151,7 @@ router.post('/new', multer({
           name: req.files.file.originalname,
           category: result.category._id,
           nsfw: (req.body.nsfw === 'true'),
+          verified: (req.body.nsfw === 'true') ? true : false,
           img: {
             data: fs.readFileSync(globals.directory +'/'+ req.files.file.path),
             contentType: req.files.file.mimetype,
@@ -180,6 +187,22 @@ router.post('/new', multer({
     });
   });
 });
+
+/* PUT ROUTES */
+router.put('/update', function(req, res){
+  console.log('update photos');
+});
+router.put('/verify/:id', function(req, res){
+  Image.findOne({_id: req.params.id}, function(err, image){
+    if(err) console.log('VERIFY: Can\'t find image: ',err);
+    image.verified = true;
+    if(req.body.nsfw === 'true') image.nsfw = true;
+    image.save(function(err, data){
+      if(err) res.status(500).send('VERIFY: Error in updating image: ', err);
+      res.status(200).send('Image verified');
+    })
+  });
+})
 
 /* DELETE ROUTES */
 router.delete('/clear', function(req, res){

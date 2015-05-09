@@ -5,6 +5,7 @@ var imageSchema = new Schema({
   name:  String,
   category: { type: String, ref: 'Category' },
   nsfw: Boolean,
+  verified: Boolean,
   img: {
     data: Buffer,
     contentType: String,

@@ -15,8 +15,10 @@ router.get('/', function(req, res) {
   res.render('index', { title: 'Soixante photos'});
 });
 
-router.get('/random', function(req, res) {;
-  Image.find((req.query.nsfw === 'true') ? {} : {nsfw: false}, function (err, docs) {
+router.get('/random', function(req, res) {
+  var params = {verified: true};
+  if(req.query.nsfw === 'false') params.nsfw = false;
+  Image.find(params, function (err, docs) {
     if(err){
       res.status(500).send('Something goes wrong: ',err);
       return console.error(err);
@@ -52,9 +54,9 @@ router.get('/:category', function(req, res){
           if(category.photos.length > 0){
             var filteredData = [];
             if(req.query.nsfw === 'true'){
-              filteredData = category.photos;
+              filteredData = _.filter(category.photos, {'verified': true});
             } else {
-              filteredData = _.filter(category.photos, {'nsfw': false});
+              filteredData = _.filter(category.photos, {'nsfw': false, 'verified': true});
             }
             var doc = _.sample(filteredData);
             res.contentType(doc.img.contentType);
