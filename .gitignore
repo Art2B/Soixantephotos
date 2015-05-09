@@ -32,3 +32,4 @@ uploads
 
 #Config files
 config.js
+public/js/config.js
