@@ -1,0 +1,114 @@
+
+/* Mixins */
+@mixin transition($p, $d, $f){
+    -webkit-transition: $p $d $f;
+    -moz-transition: $p $d $f;
+    -o-transition: $p $d $f;
+    transition: $p $d $f;
+}
+@mixin placeholder($color) {
+    &::-webkit-input-placeholder {
+        color: $color;
+    }
+    &:-moz-placeholder{
+        color: $color;
+    }
+    &::-moz-placeholder{
+        color: $color;
+    }
+    &:-ms-input-placeholder{
+        color: $color;
+    }
+}
+@mixin boxSizing($box){
+    -webkit-box-sizing: $box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: $box;    /* Firefox, other Gecko */
+    box-sizing: $box;         /* Opera/IE 8+ */
+}
+@mixin backgroundSize($property) {
+    -webkit-background-size: $property;
+    -moz-background-size: $property;
+    -o-background-size: $property;
+    background-size: $property;
+}
+@mixin fullSize() {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+@mixin transform($value){
+  -webkit-transform: $value;
+  -moz-transform: $value;
+  -ms-transform: $value;
+  -o-transform: $value;
+  transform: $value;
+}
+@mixin filter($value){
+  -webkit-filter: $value;
+  -moz-filter: $value;
+  -ms-filter: $value;
+  -o-filter: $value;
+  filter: $value;
+}
+@mixin clearBoth(){
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+@mixin vertical-align {
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+@mixin autofill($color, $background-color){
+  &:-webkit-autofill {
+    -webkit-text-fill-color: $color;
+    -webkit-box-shadow: 0 0 0px 1000px $background-color inset;
+  }
+  &:-moz-autofill {
+    -moz-text-fill-color: $color;
+    -moz-box-shadow: 0 0 0px 1000px $background-color inset;
+  }
+  &:-o-autofill {
+    -o-text-fill-color: $color;
+    -o-box-shadow: 0 0 0px 1000px $background-color inset;
+  }
+  &:-khtml-autofill {
+    -khtml-text-fill-color: $color;
+    -khtml-box-shadow: 0 0 0px 1000px $background-color inset;
+  }
+
+  &:focus:-webkit-autofill {
+    -webkit-text-fill-color: $color;
+    -webkit-box-shadow: 0 0 0px 1000px $background-color inset;
+  }
+  &:focus:-moz-autofill {
+    -moz-text-fill-color: $color;
+    -moz-box-shadow: 0 0 0px 1000px $background-color inset;
+  }
+  &:focus:-o-autofill {
+    -o-text-fill-color: $color;
+    -o-box-shadow: 0 0 0px 1000px $background-color inset;
+  }
+  &:focus:-khtml-autofill {
+    -khtml-text-fill-color: $color;
+    -khtml-box-shadow: 0 0 0px 1000px $background-color inset;
+  }
+}
+
+@mixin user-select-none {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+
+  /* No support for these yet, use at own risk */
+  -o-user-select: none;
+  user-select: none;          
+}

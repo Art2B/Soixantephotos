@@ -1,3 +1,11 @@
+@import "lib/reset";
+@import "lib/mixins";
+
+@import "partials/components";
+@import "partials/header";
+@import "partials/footer";
+
+
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
