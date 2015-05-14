@@ -191,10 +191,64 @@ router.post('/new', multer({
 /* PUT ROUTES */
 router.put('/update', function(req, res){
   console.log('update photos');
+  Image.find({}, function(err, results){
+    if(err){
+      res.status(500).send('Can\'t update images: ',err);
+      return console.error(err);
+    }
+    results.forEach(function(image){
+      if(image.nsfw !== true && image.nsfw !== false){
+        image.nsfw = false;
+      }
+      if(image.verified !== true && image.verified !== false){
+        image.verified = false;
+      }
+
+      new Promise(function(fulfill, reject){
+        Category.findOne(image.category, function(err, result){
+          if(err){
+            res.status(500).send('UPDATE: Can\'t find category of image: ',err);
+            return console.error(err);
+          }
+          if(!result){
+            fulfill(false);
+          }
+        });
+      }).then(function(isCategory){
+        return new Promise(function(fulfill, reject){
+          if(!isCategory){
+            new Category({
+              name: image.category
+            }).save(function(err, data){
+              if(err) reject(err);
+              else {
+                image.category = data._id;
+                fulfill();
+              }
+            });
+          } else {
+            fulfill();
+          }
+        });
+      }).then(function(){
+        image.save(function(err){
+          if(err){
+            res.status(500).send('UPDATE: Can\'t save image: ',err);
+            return console.error(err);
+          }
+          console.log('Image updated !');
+        });
+      });
+    });
+  });
+
 });
 router.put('/verify/:id', function(req, res){
   Image.findOne({_id: req.params.id}, function(err, image){
-    if(err) console.log('VERIFY: Can\'t find image: ',err);
+    if(err){
+      res.status(500).send('VERIFY: Can\'t find image: ',err);
+      return console.error(err);
+    }
     image.verified = true;
     if(req.body.nsfw === 'true') image.nsfw = true;
     image.save(function(err, data){
