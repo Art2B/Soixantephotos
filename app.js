@@ -19,6 +19,8 @@ var photos = require('./routes/photos');
 
 var db = require('./database/index.js');
 
+var verifyMail = require('./mail/verify.js');
+
 var app = express();
 
 
