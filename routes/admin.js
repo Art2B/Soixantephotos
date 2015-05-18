@@ -25,13 +25,16 @@ router.get('/logout', function(req, res){
   res.redirect('/');
 });
 
-// app.post('/login', do all our passport stuff here);
-router.post('/signup', passport.authenticate('signup', {
-  successRedirect : '/profile', // redirect to the secure profile section
-  failureRedirect : '/signup', // redirect back to the signup page if there is an error
-  failureFlash : true // allow flash messages
+router.post('/login', passport.authenticate('login', {
+    successRedirect : 'profile',
+    failureRedirect : 'login',
+    failureFlash : true
 }));
-
+router.post('/signup', passport.authenticate('signup', {
+  successRedirect : 'profile',
+  failureRedirect : 'signup',
+  failureFlash : true
+}));
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
