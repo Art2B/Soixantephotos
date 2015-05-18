@@ -2,3 +2,17 @@ extends ../partials/layout
 
 block content
   h1 Admin signup view
+  if message.length > 0
+    div= message
+
+  form(action="/admin/signup" method="post")
+    input(type="mail" name="email" placeholder="email")
+    input(type="password" name="password" placeholder="password")
+    button(type="submit") Sign up
+
+  br
+  hr
+  br
+
+  p Already have an account ? <a href="login">Login</a>
+  p Or go <a href="/admin">Home</a>
