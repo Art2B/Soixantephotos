@@ -2,6 +2,7 @@ global.globals = {
   directory: __dirname
 };
 
+// Import npm module
 var express = require('express');
 var fs = require('fs');
 var path = require('path');
@@ -10,17 +11,23 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var multer  = require('multer');
-var sass = require('node-sass');
 var colors = require('colors');
 
+// Routes
 var routes = require('./routes/index');
-var users = require('./routes/users');
+var admin = require('./routes/admin');
 var photos = require('./routes/photos');
 
+// Launch database
 var db = require('./database/index.js');
 
-var verifyMail = require('./mail/verify.js');
+// Compile Sass
+var sassCompiler = require('./sass/compiler.js');
 
+// Notifications mail functions
+var verifyMail = require('./mail/notifications.js');
+
+// Create Express App
 var app = express();
 
 
@@ -36,9 +43,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use('/admin', admin);
 app.use('/photos', photos);
 app.use('/', routes);
-app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -71,25 +78,6 @@ app.use(function(err, req, res, next) {
   });
 });
 
-// Sass compiler
-compileSass();
 
-fs.watch('sass/', function(event, filename){
-  console.log('Sass files changed'.cyan);
-  compileSass();
-});
-
-function compileSass(){
-  sass.render({
-    file: 'sass/main.scss',
-    outFile: 'public/css/style.css',
-    // outputStyle: 'compressed'
-  }, function(err, result) {
-    fs.writeFile('public/css/style.css', result.css, function(err){
-      if(err) console.log('Error in compiling sass: ', err);
-      else console.log('Sass compiled'.cyan);
-    });
-  });
-}
 
 module.exports = app;

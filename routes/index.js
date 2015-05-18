@@ -3,8 +3,8 @@ var mongoose = require('mongoose');
 var _ = require('lodash');
 var Promise = require('promise');
 
-var imagesSchema = require('../database/image');
-var categorySchema = require('../database/category');
+var imagesSchema = require('../database/schemas/image');
+var categorySchema = require('../database/schemas/category');
 var Image = mongoose.model('Image', imagesSchema);
 var Category = mongoose.model('Category', categorySchema);
 

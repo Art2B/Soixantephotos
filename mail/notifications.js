@@ -1,9 +1,12 @@
 var config = require('../config');
-var mandrill = require('mandrill-api/mandrill');
-var mandrill_client = new mandrill.Mandrill(config.mail.mandrill.apiKey);
+
 var colors = require('colors');
+var mandrill = require('mandrill-api/mandrill');
 var mongoose = require('mongoose');
-var imagesSchema = require('../database/image');
+
+var mandrill_client = new mandrill.Mandrill(config.mail.mandrill.apiKey);
+
+var imagesSchema = require('../database/schemas/image');
 var Image = mongoose.model('Image', imagesSchema);
 
 var message = {
