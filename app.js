@@ -21,17 +21,19 @@ var routes = require('./routes/index');
 var admin = require('./routes/admin');
 var photos = require('./routes/photos');
 
+
 // Launch database
-var db = require('./database/index.js');
-
+require('./database/index.js');
 // Compile Sass
-var sassCompiler = require('./sass/compiler.js');
-
+require('./sass/compiler.js');
 // Notifications mail functions
-var verifyMail = require('./mail/notifications.js');
+require('./mail/notifications.js');
+// Config passport
+require('./config/passport')(passport);
 
 // Create Express App
 var app = express();
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
