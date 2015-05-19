@@ -16,14 +16,18 @@ var User = require('../database/models/user');
 
 // GET Routes
 router.get('/', function(req, res) {
-  User.find({}, function(err, users){
-    if(err) res.status(500).send('Something goes wrong: ',err);
-    if(users.length > 0){
-      res.render('admin/index', {message: req.flash('loginMessage')});
-    } else {
-      res.redirect('admin/signup');
-    }
-  });
+  if(req.user){
+    res.redirect('/admin/dashboard');
+  } else {
+    User.find({}, function(err, users){
+      if(err) res.status(500).send('Something goes wrong: ',err);
+      if(users.length > 0){
+        res.render('admin/index', {message: req.flash('loginMessage')});
+      } else {
+        res.redirect('admin/signup');
+      }
+    });
+  }
 });
 router.get('/signup', function(req, res){
   res.render('admin/signup', {message: req.flash('signupMessage')});
@@ -98,59 +102,6 @@ router.put('/verify/:id', function(req, res){
       if(err) res.status(500).send('VERIFY: Error in updating image: ', err);
       res.status(200).send('Image verified');
     })
-  });
-});
-router.put('/update', function(req, res){
-  console.log('update photos');
-  Image.find({}, function(err, results){
-    if(err){
-      res.status(500).send('Can\'t update images: ',err);
-      return console.error(err);
-    }
-    results.forEach(function(image){
-      if(image.nsfw !== true && image.nsfw !== false){
-        image.nsfw = false;
-      }
-      if(image.verified !== true && image.verified !== false){
-        image.verified = false;
-      }
-
-      new Promise(function(fulfill, reject){
-        Category.findOne(image.category, function(err, result){
-          if(err){
-            res.status(500).send('UPDATE: Can\'t find category of image: ',err);
-            return console.error(err);
-          }
-          if(!result){
-            fulfill(false);
-          }
-        });
-      }).then(function(isCategory){
-        return new Promise(function(fulfill, reject){
-          if(!isCategory){
-            new Category({
-              name: image.category
-            }).save(function(err, data){
-              if(err) reject(err);
-              else {
-                image.category = data._id;
-                fulfill();
-              }
-            });
-          } else {
-            fulfill();
-          }
-        });
-      }).then(function(){
-        image.save(function(err){
-          if(err){
-            res.status(500).send('UPDATE: Can\'t save image: ',err);
-            return console.error(err);
-          }
-          console.log('Image updated !');
-        });
-      });
-    });
   });
 });
 
