@@ -20,26 +20,6 @@ var router = express.Router();
 router.get('/', function(req, res) {
   res.render('photos/index');
 });
-router.get('/new', function(req, res){
-  res.render('photos/new');
-});
-router.get('/verify', function(req, res){
-  Image.find({verified: false}, function(err, photos){
-    if(err) console.log(err);
-    res.render('photos/verify', {photos: photos});
-  })
-});
-router.get('/all', function(req, res) {
-  Image
-  .find({})
-  .populate('category')
-  .exec(function(err, images){
-    if(err){
-      throw err;
-    }
-    res.render('photos/all', {photos: images});
-  });
-});
 router.get('/:id', function(req, res){
   Image.findOne({_id: req.params.id}, function(err, photo){
     if(err){
@@ -49,6 +29,9 @@ router.get('/:id', function(req, res){
       res.status(200).send(photo.img.data);
     }
   });
+});
+router.get('/new', function(req, res){
+  res.render('photos/new');
 });
 
 /* POST ROUTES */
@@ -186,140 +169,6 @@ router.post('/new', multer({
       res.status(201).send('Image saved');
     });
   });
-});
-
-/* PUT ROUTES */
-router.put('/update', function(req, res){
-  console.log('update photos');
-  Image.find({}, function(err, results){
-    if(err){
-      res.status(500).send('Can\'t update images: ',err);
-      return console.error(err);
-    }
-    results.forEach(function(image){
-      if(image.nsfw !== true && image.nsfw !== false){
-        image.nsfw = false;
-      }
-      if(image.verified !== true && image.verified !== false){
-        image.verified = false;
-      }
-
-      new Promise(function(fulfill, reject){
-        Category.findOne(image.category, function(err, result){
-          if(err){
-            res.status(500).send('UPDATE: Can\'t find category of image: ',err);
-            return console.error(err);
-          }
-          if(!result){
-            fulfill(false);
-          }
-        });
-      }).then(function(isCategory){
-        return new Promise(function(fulfill, reject){
-          if(!isCategory){
-            new Category({
-              name: image.category
-            }).save(function(err, data){
-              if(err) reject(err);
-              else {
-                image.category = data._id;
-                fulfill();
-              }
-            });
-          } else {
-            fulfill();
-          }
-        });
-      }).then(function(){
-        image.save(function(err){
-          if(err){
-            res.status(500).send('UPDATE: Can\'t save image: ',err);
-            return console.error(err);
-          }
-          console.log('Image updated !');
-        });
-      });
-    });
-  });
-
-});
-router.put('/verify/:id', function(req, res){
-  Image.findOne({_id: req.params.id}, function(err, image){
-    if(err){
-      res.status(500).send('VERIFY: Can\'t find image: ',err);
-      return console.error(err);
-    }
-    image.verified = true;
-    if(req.body.nsfw === 'true') image.nsfw = true;
-    image.save(function(err, data){
-      if(err) res.status(500).send('VERIFY: Error in updating image: ', err);
-      res.status(200).send('Image verified');
-    })
-  });
-})
-
-/* DELETE ROUTES */
-router.delete('/clear', function(req, res){
-  new Promise(function(fulfill, reject){
-    Image.remove({}, function(err){
-      if(err){
-        res.status(500).send('Something goes wrong: ',err);
-        reject(err);
-      } else {
-        fulfill();
-      }
-    })
-  })
-  .then(function(){
-    Category.remove({}, function(err){
-      if(err){
-        res.status(500).send('Something goes wrong: ',err);
-        return console.error(err);
-      }
-      res.status(200).send('Delete all database');
-    });
-  });
-});
-router.delete('/clear/:category', function(req, res){
-  Category
-  .findOne({name: req.params.category})
-  .populate('photos')
-  .exec(function(err, category){
-    var nbPhotos = category.photos.length;
-
-    new Promise(function(fulfill, reject){
-      category.photos.forEach(function(photo, key){
-        Image.remove(photo, function(err){
-          if(err){
-            res.status(500).send('Something goes wrong: ',err);
-            console.error(err);
-          }
-          console.log('Image deleted'.red);
-          if(key == nbPhotos-1){
-            fulfill();
-          }
-        });
-      });
-    })
-    .then(function(){
-      Category.remove({name: req.params.category}, function(err){
-        if(err){
-          res.status(500).send('Something goes wrong: ',err);
-          console.error(err);
-        } else {
-          res.status(200).send('Delete all category\'s images');
-        }
-      });
-    })
-
-  });
-
-  // Image.remove({category: req.params.category}, function(err){
-  //   if(err){
-  //     res.status(500).send('Something goes wrong: ',err);
-  //     return console.error(err);
-  //   }
-  // })
 });
 
 module.exports = router;

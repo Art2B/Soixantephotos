@@ -9,7 +9,7 @@ var Verify = (function(my, $){
       }
       $.ajax({
         method: "PUT",
-        url: "/photos/verify/"+imgId,
+        url: "/admin/photos/verify/"+imgId,
         data: dataToSend
       })
       .done(function(msg) {

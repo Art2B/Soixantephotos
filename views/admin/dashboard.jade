@@ -1,0 +1,11 @@
+extends ../partials/layout
+
+block content
+  h1 Admin dashboard view
+  a(href="logout") Logout
+
+  div
+    if user.rank == 'admin'
+      a(href="photos/verify") Verify photos
+      form(action="photos/clear")
+        input(type="submit", name="clear" value="Clear all database")
