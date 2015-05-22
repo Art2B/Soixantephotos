@@ -90,7 +90,7 @@ router.post('/signup', passport.authenticate('signup', {
 }));
 
 // PUT Routes
-router.put('/verify/:id', function(req, res){
+router.put('/photos/verify/:id', function(req, res){
   Image.findOne({_id: req.params.id}, function(err, image){
     if(err){
       res.status(500).send('VERIFY: Can\'t find image: ',err);
