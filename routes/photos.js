@@ -20,6 +20,9 @@ var router = express.Router();
 router.get('/', function(req, res) {
   res.render('photos/index');
 });
+router.get('/new', function(req, res){
+  res.render('photos/new');
+});
 router.get('/:id', function(req, res){
   Image.findOne({_id: req.params.id}, function(err, photo){
     if(err){
@@ -29,9 +32,6 @@ router.get('/:id', function(req, res){
       res.status(200).send(photo.img.data);
     }
   });
-});
-router.get('/new', function(req, res){
-  res.render('photos/new');
 });
 
 /* POST ROUTES */
